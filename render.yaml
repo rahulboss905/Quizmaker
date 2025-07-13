@@ -7,3 +7,4 @@ services:
     envVars:
       - key: BOT_TOKEN
         value: YOUR_BOT_TOKEN
+        
