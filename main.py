@@ -1,62 +1,78 @@
+# main.py
+
 import os
-import re
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, MessageHandler, filters, ContextTypes
-from telegram.ext.webhookhandler import WebhookHandler
+from telegram.ext import (
+    Application, MessageHandler, CommandHandler,
+    ContextTypes, filters
+)
+import re
+import asyncio
 
-# Environment variables (set these in Render dashboard or .env if testing locally)
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # e.g., https://your-render-url.onrender.com
+TOKEN = os.getenv("BOT_TOKEN")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
-# Initialize Flask and Telegram Application
 app = Flask(__name__)
-application = Application.builder().token(BOT_TOKEN).build()
-webhook_handler = WebhookHandler(application)
+bot_app = Application.builder().token(TOKEN).build()
 
 def parse_mcqs(text):
-    pattern = re.compile(r"Q\d*[:：]\s*(.*?)\s*A\)\s*(.*?)\s*B\)\s*(.*?)\s*C\)\s*(.*?)\s*D\)\s*(.*?)\s*Answer[:：]\s*([A-D])", re.DOTALL)
+    pattern = re.compile(r"Q\d*: (.*?)\nA\) (.*?)\nB\) (.*?)\nC\) (.*?)\nD\) (.*?)\nAnswer: ([ABCD])", re.DOTALL)
     return pattern.findall(text)
 
-async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    doc = update.message.document
-    if not doc.file_name.endswith(".txt"):
-        await update.message.reply_text("Send a .txt file only.")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Send a .txt file containing MCQs.")
+
+async def handle_txt(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    document = update.message.document
+    if not document.file_name.endswith('.txt'):
+        await update.message.reply_text("Please upload a .txt file.")
         return
 
-    file = await doc.get_file()
-    text = await file.download_as_bytearray()
-    mcqs = parse_mcqs(text.decode())
+    file = await context.bot.get_file(document.file_id)
+    content = await file.download_as_bytearray()
+    text = content.decode("utf-8")
+    mcqs = parse_mcqs(text)
 
     if not mcqs:
         await update.message.reply_text("Couldn't parse any MCQs.")
         return
 
-    for i, (question, a, b, c, d, answer) in enumerate(mcqs, start=1):
-        options = [a.strip(), b.strip(), c.strip(), d.strip()]
-        correct_option = ord(answer.upper()) - ord("A")
+    for idx, (q, a, b, c, d, ans) in enumerate(mcqs):
+        options = [a, b, c, d]
+        correct_idx = ["A", "B", "C", "D"].index(ans.strip())
         await context.bot.send_poll(
             chat_id=update.effective_chat.id,
-            question=f"Q{i}: {question.strip()}",
+            question=f"Q{idx+1}: {q.strip()}",
             options=options,
             type='quiz',
-            correct_option_id=correct_option,
-            is_anonymous=False,
+            correct_option_id=correct_idx,
+            is_anonymous=False
         )
+        await asyncio.sleep(1.2)  # Rate-limit for safety
 
-# Telegram handler for document uploads
-application.add_handler(MessageHandler(filters.Document.ALL, handle_file))
+bot_app.add_handler(CommandHandler("start", start))
+bot_app.add_handler(MessageHandler(filters.Document.ALL, handle_txt))
 
-# Webhook endpoint
-@app.post("/hook")
-async def webhook():
-    await webhook_handler.handle_update(request)
-    return "ok"
+@app.route(f"/{TOKEN}", methods=["POST"])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), bot_app.bot)
+    bot_app.update_queue.put_nowait(update)
+    return "OK", 200
+
+@app.route("/", methods=["GET"])
+def home():
+    return "Bot is running!", 200
+
+async def set_webhook():
+    await bot_app.bot.set_webhook(f"{WEBHOOK_URL}/{TOKEN}")
 
 if __name__ == "__main__":
-    application.run_webhook(
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(set_webhook())
+    bot_app.run_webhook(
         listen="0.0.0.0",
-        port=int(os.environ.get("PORT", 8000)),
-        webhook_url=WEBHOOK_URL + "/hook"
+        port=int(os.environ.get("PORT", 10000)),
+        webhook_url=f"{WEBHOOK_URL}/{TOKEN}",
     )
     
