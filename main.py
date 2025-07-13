@@ -1,77 +1,62 @@
-# main.py
 import os
-from flask import Flask, request
-from telegram import Update, Bot
-from telegram.constants import ParseMode
-from telegram.ext import Dispatcher, MessageHandler, filters
-from telegram.ext import Application, ApplicationBuilder
 import re
+from flask import Flask, request
+from telegram import Update
+from telegram.ext import Application, MessageHandler, filters, ContextTypes
+from telegram.ext.webhookhandler import WebhookHandler
 
-app = Flask(__name__)
+# Environment variables (set these in Render dashboard or .env if testing locally)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-bot = Bot(token=BOT_TOKEN)
-dispatcher = Dispatcher(bot=bot, update_queue=None, workers=1)
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # e.g., https://your-render-url.onrender.com
 
+# Initialize Flask and Telegram Application
+app = Flask(__name__)
+application = Application.builder().token(BOT_TOKEN).build()
+webhook_handler = WebhookHandler(application)
 
-# Parse MCQ questions from .txt
 def parse_mcqs(text):
-    pattern = re.compile(
-        r"Q\d*[:.]\s*(.*?)\nA\)\s*(.*?)\nB\)\s*(.*?)\nC\)\s*(.*?)\nD\)\s*(.*?)\nAnswer:\s*([A-Da-d])",
-        re.DOTALL
-    )
+    pattern = re.compile(r"Q\d*[:：]\s*(.*?)\s*A\)\s*(.*?)\s*B\)\s*(.*?)\s*C\)\s*(.*?)\s*D\)\s*(.*?)\s*Answer[:：]\s*([A-D])", re.DOTALL)
     return pattern.findall(text)
 
-
-# Handle .txt file upload
-async def handle_doc(update: Update, context):
+async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     doc = update.message.document
     if not doc.file_name.endswith(".txt"):
-        await update.message.reply_text("Only .txt files are accepted.")
+        await update.message.reply_text("Send a .txt file only.")
         return
 
     file = await doc.get_file()
-    file_path = f"/tmp/{doc.file_unique_id}.txt"
-    await file.download_to_drive(file_path)
+    text = await file.download_as_bytearray()
+    mcqs = parse_mcqs(text.decode())
 
-    with open(file_path, encoding="utf-8") as f:
-        content = f.read()
-
-    questions = parse_mcqs(content)
-    if not questions:
+    if not mcqs:
         await update.message.reply_text("Couldn't parse any MCQs.")
         return
 
-    for q in questions:
-        question, a, b, c, d, ans = [x.strip() for x in q]
-        options = [a, b, c, d]
-        correct_index = ord(ans.lower()) - ord("a")
-
-        await bot.send_poll(
+    for i, (question, a, b, c, d, answer) in enumerate(mcqs, start=1):
+        options = [a.strip(), b.strip(), c.strip(), d.strip()]
+        correct_option = ord(answer.upper()) - ord("A")
+        await context.bot.send_poll(
             chat_id=update.effective_chat.id,
-            question=question,
+            question=f"Q{i}: {question.strip()}",
             options=options,
-            type="quiz",
-            correct_option_id=correct_index,
-            is_anonymous=False
+            type='quiz',
+            correct_option_id=correct_option,
+            is_anonymous=False,
         )
 
+# Telegram handler for document uploads
+application.add_handler(MessageHandler(filters.Document.ALL, handle_file))
 
-handler = MessageHandler(filters.Document.ALL, handle_doc)
-dispatcher.add_handler(handler)
-
-
-@app.route(f"/{BOT_TOKEN}", methods=["POST"])
-def webhook():
-    update = Update.de_json(request.get_json(force=True), bot)
-    dispatcher.process_update(update)
+# Webhook endpoint
+@app.post("/hook")
+async def webhook():
+    await webhook_handler.handle_update(request)
     return "ok"
 
-
-@app.route("/")
-def index():
-    return "Bot is running"
-
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 8000)),
+        webhook_url=WEBHOOK_URL + "/hook"
+    )
     
