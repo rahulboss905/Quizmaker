@@ -1,100 +1,77 @@
+# main.py
 import os
-import logging
-import re
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from telegram import Update, Bot, Poll
-from telegram.ext import Application, ApplicationBuilder, ContextTypes, MessageHandler, filters, AIORateLimiter
-from dotenv import load_dotenv
+from flask import Flask, request
+from telegram import Update, Bot
 from telegram.constants import ParseMode
+from telegram.ext import Dispatcher, MessageHandler, filters
+from telegram.ext import Application, ApplicationBuilder
+import re
 
-load_dotenv()
-
+app = Flask(__name__)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # e.g., https://your-app.onrender.com
-
 bot = Bot(token=BOT_TOKEN)
+dispatcher = Dispatcher(bot=bot, update_queue=None, workers=1)
 
-# Initialize FastAPI
-app = FastAPI()
 
-# ========== MCQ PARSER ==========
+# Parse MCQ questions from .txt
 def parse_mcqs(text):
     pattern = re.compile(
-        r"Q\d*[:\-\.]?\s*(.*?)\s*(?:\n|\r\n)"
-        r"A\)\s*(.*?)\s*(?:\n|\r\n)"
-        r"B\)\s*(.*?)\s*(?:\n|\r\n)"
-        r"C\)\s*(.*?)\s*(?:\n|\r\n)"
-        r"D\)\s*(.*?)\s*(?:\n|\r\n)"
-        r"Answer[:\-\.]?\s*([ABCD])",
-        re.IGNORECASE
+        r"Q\d*[:.]\s*(.*?)\nA\)\s*(.*?)\nB\)\s*(.*?)\nC\)\s*(.*?)\nD\)\s*(.*?)\nAnswer:\s*([A-Da-d])",
+        re.DOTALL
     )
-    questions = pattern.findall(text)
-    return [{
-        "question": q.strip(),
-        "options": [a.strip(), b.strip(), c.strip(), d.strip()],
-        "correct_option_id": "ABCD".index(ans.upper())
-    } for q, a, b, c, d, ans in questions]
+    return pattern.findall(text)
 
-# ========== TELEGRAM HANDLER ==========
-async def handle_doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+# Handle .txt file upload
+async def handle_doc(update: Update, context):
     doc = update.message.document
     if not doc.file_name.endswith(".txt"):
-        await update.message.reply_text("❌ Please upload a `.txt` file.")
+        await update.message.reply_text("Only .txt files are accepted.")
         return
 
-    file = await context.bot.get_file(doc.file_id)
-    file_path = await file.download_to_drive()
+    file = await doc.get_file()
+    file_path = f"/tmp/{doc.file_unique_id}.txt"
+    await file.download_to_drive(file_path)
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding="utf-8") as f:
         content = f.read()
 
-    mcqs = parse_mcqs(content)
-    if not mcqs:
-        await update.message.reply_text("⚠️ Couldn't parse any MCQs.")
+    questions = parse_mcqs(content)
+    if not questions:
+        await update.message.reply_text("Couldn't parse any MCQs.")
         return
 
-    for q in mcqs:
-        await update.message.chat.send_poll(
-            question=q['question'],
-            options=q['options'],
-            type=Poll.QUIZ,
-            correct_option_id=q['correct_option_id'],
+    for q in questions:
+        question, a, b, c, d, ans = [x.strip() for x in q]
+        options = [a, b, c, d]
+        correct_index = ord(ans.lower()) - ord("a")
+
+        await bot.send_poll(
+            chat_id=update.effective_chat.id,
+            question=question,
+            options=options,
+            type="quiz",
+            correct_option_id=correct_index,
             is_anonymous=False
         )
 
-# ========== SETUP TELEGRAM APP ==========
-@app.on_event("startup")
-async def start_bot():
-    app.bot_app = (
-        ApplicationBuilder()
-        .token(BOT_TOKEN)
-        .rate_limiter(AIORateLimiter())
-        .build()
-    )
 
-    app.bot_app.add_handler(MessageHandler(filters.Document.ALL, handle_doc))
-    await bot.set_webhook(f"{WEBHOOK_URL}/webhook")
-    await app.bot_app.initialize()
-    await app.bot_app.start()
-    print("✅ Bot started and webhook set.")
+handler = MessageHandler(filters.Document.ALL, handle_doc)
+dispatcher.add_handler(handler)
 
-@app.on_event("shutdown")
-async def shutdown_bot():
-    await app.bot_app.stop()
-    await app.bot_app.shutdown()
-    print("🛑 Bot stopped.")
 
-# ========== WEBHOOK ENDPOINT ==========
-@app.post("/webhook")
-async def telegram_webhook(req: Request):
-    data = await req.json()
-    update = Update.de_json(data, bot)
-    await app.bot_app.process_update(update)
-    return JSONResponse(content={"ok": True})
+@app.route(f"/{BOT_TOKEN}", methods=["POST"])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), bot)
+    dispatcher.process_update(update)
+    return "ok"
 
-# ========== BASIC HEALTH CHECK ==========
-@app.get("/")
-def root():
-    return {"status": "Bot is running"}
+
+@app.route("/")
+def index():
+    return "Bot is running"
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
     
