@@ -1,30 +1,33 @@
 import os
 import logging
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from telegram import Update, Bot, Poll
-from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
-from telegram.ext import AIORateLimiter
+from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters, AIORateLimiter
 from telegram.constants import ParseMode
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
+import re
 
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
-app = FastAPI()
 bot = Bot(token=BOT_TOKEN)
 
 # ========== MCQ Parser ==========
-import re
-
 def parse_mcqs(text):
-    pattern = re.compile(r"Q\d*[:\-\.]?\s*(.*?)\s*(?:\n|\r\n)"
-                         r"A\)\s*(.*?)\s*(?:\n|\r\n)"
-                         r"B\)\s*(.*?)\s*(?:\n|\r\n)"
-                         r"C\)\s*(.*?)\s*(?:\n|\r\n)"
-                         r"D\)\s*(.*?)\s*(?:\n|\r\n)"
-                         r"Answer[:\-\.]?\s*([ABCD])", re.IGNORECASE)
+    pattern = re.compile(
+        r"Q\d*[:\-\.]?\s*(.*?)\s*(?:\n|\r\n)"
+        r"A\)\s*(.*?)\s*(?:\n|\r\n)"
+        r"B\)\s*(.*?)\s*(?:\n|\r\n)"
+        r"C\)\s*(.*?)\s*(?:\n|\r\n)"
+        r"D\)\s*(.*?)\s*(?:\n|\r\n)"
+        r"Answer[:\-\.]?\s*([ABCD])",
+        re.IGNORECASE
+    )
     questions = pattern.findall(text)
     return [{
         "question": q.strip(),
@@ -33,7 +36,6 @@ def parse_mcqs(text):
     } for q, a, b, c, d, ans in questions]
 
 # ========== Bot Logic ==========
-
 async def handle_doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
     doc = update.message.document
     if not doc.file_name.endswith(".txt"):
@@ -48,7 +50,7 @@ async def handle_doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     mcqs = parse_mcqs(content)
     if not mcqs:
-        await update.message.reply_text("No valid MCQs found.")
+        await update.message.reply_text("Couldn't parse any MCQs.")
         return
 
     for q in mcqs:
@@ -60,10 +62,10 @@ async def handle_doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
             is_anonymous=False
         )
 
-# ========== Telegram Setup ==========
+# ========== FastAPI App with Lifespan ==========
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     application = (
         ApplicationBuilder()
         .token(BOT_TOKEN)
@@ -71,14 +73,15 @@ async def startup():
         .build()
     )
     application.add_handler(MessageHandler(filters.Document.ALL, handle_doc))
-
     await bot.set_webhook(f"{WEBHOOK_URL}/webhook")
     app.bot_app = application
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/webhook")
-async def telegram_webhook(req: Request):
-    data = await req.json()
+async def telegram_webhook(request: Request):
+    data = await request.json()
     update = Update.de_json(data, bot)
     await app.bot_app.process_update(update)
-    return {"ok": True}
-    
+    return JSONResponse(content={"ok": True})
