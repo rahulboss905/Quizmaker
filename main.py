@@ -196,7 +196,7 @@ def main() -> None:
     logger.info(f"Loaded {len(quiz_questions)} quiz questions")
     
     # Create the Application
-    application = Application.builder().token(bot_token).build()
+    application = Application.builder().token(my_bot_token).build()
 
     # Add command handlers
     application.add_handler(CommandHandler("start", start))
