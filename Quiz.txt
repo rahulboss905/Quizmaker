@@ -1,0 +1,175 @@
+
+Q1: Debt Equity ratio after buyback must not be more than ____________
+A) 1 : 1
+B) 1 : 2
+C) 2 : 3
+D) 2 : 1
+Answer: D
+
+Q2: Buy-back of Equity Shares in any financial shares shall not exceed:
+A) 5% of its total capital
+B) 20% of Nominal Share Capital
+C) 25% of fully paid Equity Shares
+D) None of above
+Answer: C
+
+Q3: As per section 68 of the Companies Act 2013, a company can buy back its own shares out of:
+A) Free Reserves which are available for distribution as dividend.
+B) Securities premium account.
+C) Proceeds of fresh issue of shares or other specified securities.
+D) All of the above.
+Answer: D
+
+Q4: According to Sec. 68(5) of the Companies Act, 2013, the buyback can be made from:
+A) From the existing shareholders on a proportionate basis.
+B) From open market.
+C) From employees to whom shares are issued under stock option or sweat equity share.
+D) All of the above.
+Answer: D
+
+Q5: If shares are bought back out of free reserves then a sum equal to nominal value of the shares so bought back is transferred to:
+A) Capital reserve account.
+B) Capital redemption reserve account (CRR).
+C) General reserve account.
+D) Forfeited shares account.
+Answer: B
+
+Q6: Premium payable on buy back is adjusted out of:
+A) Securities premium account.
+B) Free reserves.
+C) Both of the above.
+D) None of the above.
+Answer: C
+
+Q7: Which of the following statement is false?
+A) Buy back must be authorised by articles of company.
+B) A special resolution must be passed for buy back.
+C) Shares can be partly paid up.
+D) The ratio of debt owed by the company is not more than twice the capital and its free reserves after such buy back.
+Answer: C
+
+Q8: When a company completes buyback of its shares, it cannot further issue same kind of shares within a period of:
+A) 6 months
+B) 1 year
+C) 2 years
+D) 5 years
+Answer: A
+
+Q9: For cancellation of shares at the time of buy back ____________
+A) Equity share capital a/c is debited and shareholders account is credited
+B) Shareholders account is debited and Equity share capital account is credited
+C) Equity share capital is debited and CRR is credited
+D) Equity share capital is debited and Shares Surrendered is credited
+Answer: A
+
+Q10: As per SEBI guidelines, Buy-back is permissible:
+A) From the existing security holders on a proportionate basis through the tender offer;
+B) From the open market through (i) Book-building process, (ii) stock exchange;
+C) From odd lots, that is to say, where the lot of securities of a public company whose shares are listed on a recognized stock exchange is smaller than such marketable lot as may be specified by the stock exchange:
+D) All of the above mentioned statements are correct.
+Answer: D
+
+Q11: Which of the following is not a free reserve for the purpose of buyback of shares?
+A) General reserves
+B) Surplus
+C) Dividend equalisation reserves
+D) Revaluation reserve
+Answer: D
+
+Q12: Provisions relating to buying back of securities are contained in which section of the Companies Act, 2013?
+A) Section 77
+B) Section 77A
+C) Section 68
+D) Section 63
+Answer: C
+
+Q13: The maximum permissible buy-back under the Companies Act, 2013 can be:
+A) 15% of paid-up capital with Board resolution.
+B) 25% of paid-up capital with Board resolution.
+C) 25% of the aggregate of paid-up capital and free reserves of the company with a special resolution of shareholders.
+D) 25% of the aggregate of paid-up capital and free reserves of the company with an ordinary resolution of shareholders.
+Answer: C
+
+Q14: For buy-back up to ____________ of the company, Board resolution is sufficient.
+A) 10% of paid-up capital
+B) 10% of free reserves
+C) 10% of paid-up capital or free reserves
+D) 10% of paid-up capital and free reserves
+Answer: D
+
+Q15: As per Section 68 of the Companies Act, 2013, the post-buy-back debt-equity ratio should not exceed:
+A) 1
+B) 1.5
+C) 2
+D) 3
+Answer: C
+
+Q16: No offer of buy-back shall be made within a period of ____________ reckoned from the date of the closure of the preceding offer of buy-back
+A) 6 months
+B) 1 year
+C) 2 years
+D) 10 months
+Answer: B
+
+Q17: The Board of Directors passed a resolution in a Board meeting to buy back a maximum number of shares as allowed by law. Maximum No. of shares that can be bought back = ?
+A) 50,000 shares
+B) 67,000 shares
+C) 1,25,000 shares
+D) 1,67,500 shares
+Answer: B
+
+Q18: N Ltd. had 90,000 equity shares of â‚¹100 each, fully paid up. The company decided to buy back 10% shares at par by the issue of sufficient number of preference shares. N Ltd. does not have any reserves. How many preference shares are required to be issued if new preference shares are to be issued at â‚¹10 each?
+A) 9,00,000 shares
+B) 90,000 shares
+C) 1,00,000 shares
+D) 1,20,000 shares
+Answer: B
+
+Q19: S Ltd. decided to buy back 2,000 equity shares of â‚¹100 each at a premium of 10%. For the purpose of redemption, the company issued 15,000 10% Preference shares of â‚¹10 each at a premium of 20%. At the time of buy-back shares, the amount to be transferred by the company to the Capital Redemption Reserve Account = ?
+A) â‚¹20,000
+B) â‚¹50,000
+C) â‚¹1,50,000
+D) â‚¹2,00,000
+Answer: B
+
+Q20: As per section 68(1) of the Companies Act, buy-back of own shares by the company, shall not exceed:
+A) 25% of the total paid-up capital and free reserves of the company.
+B) 20% of the total paid-up capital and free reserves of the company.
+C) 15% of the total paid-up capital and free reserves of the company.
+D) 10% of the total paid-up capital and free reserves of the company.
+Answer: A
+
+Q21: The companies are permitted to buy-back their own shares out of:
+A) Free reserves and Securities premium
+B) Proceeds of the issue of any shares.
+C) Both (a) and (b)
+D) Neither (a) nor (b).
+Answer: C
+
+Q22: When a company purchases its own shares out of free reserves; a sum equal to nominal value of shares so purchased shall be transferred to:
+A) Revenue redemption reserve.
+B) Capital redemption reserve.
+C) Buy-back reserve
+D) Special reserve
+Answer: B
+
+Q23: State which of the following statement is true?
+A) Buy-back is for more than twenty-five per cent of the total paid-up capital and free reserves of the company.
+B) Partly paid shares cannot be bought back by a company.
+C) Buy-back of equity shares in any financial year shall exceed twenty-five per cent of its total paid-up equity capital in that financial year.
+D) Partly paid shares can be bought back by a company.
+Answer: B
+
+Q24: Premium (excess of buy-back price over the par value) paid on buy-back should be adjusted against:
+A) Free reserves.
+B) Securities premium.
+C) Both (a) and (b).
+D) Neither (a) nor (b).
+Answer: C
+
+Q25: Advantages of Buy-back of shares includes:
+A) Encourage others to make hostile bid to take over the company.
+B) Decrease promoters holding as the shares which are bought back are cancelled.
+C) Discourage others to make hostile bid to take over the company as the buy-back will increase the promoters holding.
+D) All of the above.
+Answer: C
