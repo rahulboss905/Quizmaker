@@ -31,7 +31,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 from PIL import Image, ImageDraw, ImageFont
 import os
 
-my_bot_token = os.environ['BOT_TOKEN', ]
+my_bot_token = os.environ['BOT_TOKEN']
 
 # Enable logging
 logging.basicConfig(
