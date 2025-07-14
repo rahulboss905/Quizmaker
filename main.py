@@ -38,7 +38,7 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
 from telegram import Update, Poll
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, PollAnswerHandler
 
-my_bot_token = os.environ['YOUR_BOT_TOKEN']
+my_bot_token = os.environ['BOT_TOKEN']
 
 # Enable logging
 logging.basicConfig(
@@ -196,7 +196,7 @@ def main() -> None:
     logger.info(f"Loaded {len(quiz_questions)} quiz questions")
     
     # Create the Application
-    application = Application.builder().token(my_bot_token).build()
+    application = Application.builder().token(bot_token).build()
 
     # Add command handlers
     application.add_handler(CommandHandler("start", start))
