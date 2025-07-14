@@ -81,16 +81,7 @@ def load_quiz_questions(file_path: str) -> List[Dict]:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     await update.message.reply_html(
-        rf"""Hi {user.mention_html()}! 🧠 Welcome to the Quiz Bot!
-
-Commands:
-/quiz - Get a random quiz question
-/help - Show this help message
-/reload - Reload questions from file
-
-📎 You can also send me a .txt file with your own quiz!"""
-    )
-    
+        rf"Hi {user.mention_html()}! 🧠 Welcome to the Quiz Bot!
 
 "
         "Commands:
@@ -189,4 +180,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-        
+    
