@@ -31,11 +31,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Store quiz questions
 quiz_questions = []
 
 def load_quiz_questions(file_path: str) -> List[Dict]:
-    """Load quiz questions from a text file."""
     questions = []
     if not os.path.exists(file_path):
         logger.warning(f"Quiz file {file_path} not found")
@@ -81,19 +79,14 @@ def load_quiz_questions(file_path: str) -> List[Dict]:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     await update.message.reply_html(
-        rf"Hi {user.mention_html()}! 🧠 Welcome to the Quiz Bot!
+        rf"""Hi {user.mention_html()}! 🧠 Welcome to the Quiz Bot!
 
-"
-        "Commands:
-"
-        "/quiz - Get a random quiz question
-"
-        "/help - Show this help message
-"
-        "/reload - Reload questions from file
+Commands:
+/quiz - Get a random quiz question
+/help - Show this help message
+/reload - Reload questions from file
 
-"
-        "📎 You can also send me a .txt file with your own quiz!"
+📎 You can also send me a .txt file with your own quiz!"""
     )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
